@@ -2,22 +2,22 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# Generate SSH key pair
+# Generate SSH Key Pair
 resource "tls_private_key" "my_key" {
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
-# Save private key locally
+# Save private key locally (Windows Path)
 resource "local_file" "private_key" {
-  filename        = "${path.module}/my-key.pem"
+  filename        = "C:\\Users\\hr378\\Downloads"
   content         = tls_private_key.my_key.private_key_pem
   file_permission = "0600"
 }
 
 # Store public key in AWS
 resource "aws_key_pair" "my_key" {
-  key_name   = "my-key"
+  key_name   = "cluster"
   public_key = tls_private_key.my_key.public_key_openssh
 }
 
@@ -26,12 +26,12 @@ resource "aws_security_group" "vm_sg" {
   name        = "vm-security-group"
   description = "Allow SSH and HTTP traffic"
 
-  # Allow SSH from anywhere (Restrict to your IP in production)
+  # Allow SSH from your IP only (Replace with your actual IP)
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["YOUR_PUBLIC_IP/32"]  # Replace with your public IP
   }
 
   # Allow HTTP access from anywhere
@@ -60,14 +60,17 @@ resource "aws_instance" "my_instance" {
 
   user_data = <<-EOF
     #!/bin/bash
+    set -e
     sudo apt update -y
     sudo apt install -y unzip wget
-    wget -O delegate.tar.gz "https://app.harness.io/storage/harness-download/delegate/delegate.tar.gz"
-    mkdir /opt/harness-delegate
-    tar -xzf delegate.tar.gz -C /opt/harness-delegate
+
+    # Download and Install Harness Delegate
+    wget -O /tmp/delegate.tar.gz "https://app.harness.io/storage/harness-download/delegate/delegate.tar.gz"
+    mkdir -p /opt/harness-delegate
+    tar -xzf /tmp/delegate.tar.gz -C /opt/harness-delegate
     cd /opt/harness-delegate
     chmod +x start.sh
-    nohup ./start.sh &
+    nohup ./start.sh > /opt/harness-delegate/delegate.log 2>&1 &
   EOF
 
   tags = {
@@ -81,5 +84,5 @@ output "instance_public_ip" {
 }
 
 output "ssh_command" {
-  value = "ssh -i my-key.pem ec2-user@${aws_instance.my_instance.public_ip}"
+  value = "ssh -i C:\\Users\\hr378\\Downloads ec2-user@${aws_instance.my_instance.public_ip}"
 }
