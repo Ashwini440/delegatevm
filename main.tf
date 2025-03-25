@@ -2,23 +2,9 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# Generate SSH Key Pair
-resource "tls_private_key" "my_key" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "local_file" "private_key" {
-  filename        = "C:\\Users\\hr378\\Downloads\\cluster.pem"
-  content         = tls_private_key.my_key.private_key_pem
-  file_permission = "0600"
-}
-
-
-# Store public key in AWS
+# Reference the existing key pair in AWS
 resource "aws_key_pair" "my_key" {
-  key_name   = "naruto"
-  public_key_openssh = tls_private_key.my_key.public_key_openss  # Use existing key
+  key_name = "cluster"  # Use the existing key pair from AWS
 }
 
 # Security Group for VM
@@ -26,23 +12,20 @@ resource "aws_security_group" "vm_sg" {
   name        = "vm-security-group"
   description = "Allow SSH and HTTP traffic"
 
-  # Allow SSH from your IP only (Replace with your actual IP)
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # Replace with your public IP
+    cidr_blocks = ["0.0.0.0/0"]  # Allow SSH (Change to your IP for security)
   }
 
-  # Allow HTTP access from anywhere
   ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]  # Allow HTTP
   }
 
-  # Allow all outbound traffic
   egress {
     from_port   = 0
     to_port     = 0
@@ -55,7 +38,7 @@ resource "aws_security_group" "vm_sg" {
 resource "aws_instance" "my_instance" {
   ami                  = "ami-03a6dea316143e1c8"  # Replace with a valid AMI ID
   instance_type        = "t2.micro"
-  key_name             = aws_key_pair.my_key.key_name
+  key_name             = "cluster"  # Use the existing key pair
   vpc_security_group_ids = [aws_security_group.vm_sg.id]
 
   user_data = <<-EOF
@@ -77,9 +60,8 @@ resource "aws_instance" "my_instance" {
     Name = "delegate"
   }
 }
-# Fix SSH output
+
+# SSH Command Output
 output "ssh_command" {
   value = "ssh -i C:\\Users\\hr378\\Downloads\\cluster.pem ec2-user@${aws_instance.my_instance.public_ip}"
 }
-
-
