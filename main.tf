@@ -1,6 +1,28 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    local = {                          # ✅ Add this to fix the error
+      source  = "hashicorp/local"
+      version = "~> 2.0"
+    }
+  }
+}
+
 provider "aws" {
   region = "us-east-1"
 }
+
+provider "local" {}   # ✅ Ensure the local provider is defined
+
+resource "local_file" "private_key" {
+  filename        = "C:\\Users\\hr378\\Downloads\\cluster.pem"
+  content         = "your_private_key_content_here"  # If dynamically generated, use `tls_private_key.my_key.private_key_pem`
+  file_permission = "0600"
+}
+
 
 # Security Group for VM
 resource "aws_security_group" "vm_sg" {
