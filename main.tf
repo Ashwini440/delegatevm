@@ -71,7 +71,8 @@ resource "aws_instance" "my_instance" {
 
     # Download and Install Harness Delegate
     cd /opt
-    wget -O delegate.tar.gz "https://app.harness.io/storage/harness-download/delegate/delegate.tar.gz"
+    curl -o delegate.tar.gz "https://app.harness.io/storage/harness-download/delegate/delegate.tar.gz"
+
     mkdir -p /opt/harness-delegate
     tar -xzf delegate.tar.gz -C /opt/harness-delegate
 
