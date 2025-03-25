@@ -62,17 +62,38 @@ resource "aws_instance" "my_instance" {
 
   user_data = <<-EOF
     #!/bin/bash
-    set -e
-    sudo yum update -y
-    sudo yum install -y unzip wget
-
-    # Download and Install Harness Delegate
-    wget -O /tmp/delegate.tar.gz "https://app.harness.io/storage/harness-download/delegate/delegate.tar.gz"
+    cd /opt
+    wget -O delegate.tar.gz "https://app.harness.io/storage/harness-download/delegate/delegate.tar.gz"
     mkdir -p /opt/harness-delegate
-    tar -xzf /tmp/delegate.tar.gz -C /opt/harness-delegate
+    tar -xvzf delegate.tar.gz -C /opt/harness-delegate
     cd /opt/harness-delegate
     chmod +x start.sh
-    nohup ./start.sh > /opt/harness-delegate/delegate.log 2>&1 &
+    nohup ./start.sh > delegate.log 2>&1 &
+    ps aux | grep delegate
+    tail -f delegate.log
+    vi /etc/systemd/system/harness-delegate.service
+    [Unit]
+Description=Harness Delegate
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/harness-delegate
+ExecStart=/opt/harness-delegate/start.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+systemctl daemon-reload
+systemctl enable harness-delegate
+systemctl start harness-delegate
+systemctl status harness-delegate
+
+
+
+
+
   EOF
 
   tags = {
