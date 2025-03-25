@@ -62,39 +62,48 @@ resource "aws_instance" "my_instance" {
 
   user_data = <<-EOF
     #!/bin/bash
+    set -e  # Exit script on error
+    exec > /var/log/user-data.log 2>&1  # Log output for debugging
+
+    # Install required packages
+    sudo yum update -y || sudo apt update -y
+    sudo yum install -y wget unzip || sudo apt install -y wget unzip
+
+    # Download and Install Harness Delegate
     cd /opt
     wget -O delegate.tar.gz "https://app.harness.io/storage/harness-download/delegate/delegate.tar.gz"
     mkdir -p /opt/harness-delegate
-    tar -xvzf delegate.tar.gz -C /opt/harness-delegate
+    tar -xzf delegate.tar.gz -C /opt/harness-delegate
+
+    # Set permissions and start the delegate
     cd /opt/harness-delegate
     chmod +x start.sh
     nohup ./start.sh > delegate.log 2>&1 &
-    ps aux | grep delegate
-    tail -f delegate.log
-    vi /etc/systemd/system/harness-delegate.service
+
+    # Create a systemd service for auto-restart
+    cat <<EOT > /etc/systemd/system/harness-delegate.service
     [Unit]
-Description=Harness Delegate
-After=network.target
+    Description=Harness Delegate
+    After=network.target
 
-[Service]
-Type=simple
-User=root
-WorkingDirectory=/opt/harness-delegate
-ExecStart=/opt/harness-delegate/start.sh
-Restart=always
+    [Service]
+    Type=simple
+    User=root
+    WorkingDirectory=/opt/harness-delegate
+    ExecStart=/opt/harness-delegate/start.sh
+    Restart=always
 
-[Install]
-WantedBy=multi-user.target
-systemctl daemon-reload
-systemctl enable harness-delegate
-systemctl start harness-delegate
-systemctl status harness-delegate
+    [Install]
+    WantedBy=multi-user.target
+    EOT
 
+    # Reload systemd and enable the delegate service
+    systemctl daemon-reload
+    systemctl enable harness-delegate
+    systemctl start harness-delegate
 
+EOF
 
-
-
-  EOF
 
   tags = {
     Name = "delegate"
