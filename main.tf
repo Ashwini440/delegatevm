@@ -10,8 +10,8 @@ resource "tls_private_key" "my_key" {
 
 # Save private key locally
 resource "local_file" "private_key" {
-  filename = "${path.module}/my-key.pem"
-  content  = tls_private_key.my_key.private_key_pem
+  filename        = "${path.module}/my-key.pem"
+  content         = tls_private_key.my_key.private_key_pem
   file_permission = "0600"
 }
 
@@ -53,10 +53,10 @@ resource "aws_security_group" "vm_sg" {
 
 # Provision EC2 instance
 resource "aws_instance" "my_instance" {
-  ami             = ami-03a6dea316143e1c8
-  instance_type   = t2.micro
-  key_name        = aws_key_pair.my_key.key_name
-  security_groups = [aws_security_group.vm_sg.name]
+  ami                  = "ami-03a6dea316143e1c8"  # Replace with a valid AMI ID
+  instance_type        = "t2.micro"
+  key_name             = aws_key_pair.my_key.key_name
+  vpc_security_group_ids = [aws_security_group.vm_sg.id]
 
   user_data = <<-EOF
     #!/bin/bash
@@ -71,6 +71,15 @@ resource "aws_instance" "my_instance" {
   EOF
 
   tags = {
-    Name = delegate
+    Name = "delegate"
   }
+}
+
+# Terraform Outputs
+output "instance_public_ip" {
+  value = aws_instance.my_instance.public_ip
+}
+
+output "ssh_command" {
+  value = "ssh -i my-key.pem ec2-user@${aws_instance.my_instance.public_ip}"
 }
