@@ -17,7 +17,7 @@ resource "local_file" "private_key" {
 
 # Store public key in AWS
 resource "aws_key_pair" "my_key" {
-  key_name   = "cluster"
+  key_name   = "naruto"
   public_key = tls_private_key.my_key.public_key_openssh
 }
 
