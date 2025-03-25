@@ -63,8 +63,8 @@ resource "aws_instance" "my_instance" {
   user_data = <<-EOF
     #!/bin/bash
     set -e
-    sudo apt update -y
-    sudo apt install -y unzip wget
+    sudo yum update -y
+    sudo yum install -y unzip wget
 
     # Download and Install Harness Delegate
     wget -O /tmp/delegate.tar.gz "https://app.harness.io/storage/harness-download/delegate/delegate.tar.gz"
