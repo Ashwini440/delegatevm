@@ -9,7 +9,7 @@ resource "tls_private_key" "my_key" {
 }
 
 resource "local_file" "private_key" {
-  filename        = "C:\\Users\\hr378\\Downloads\\naruto.pem"
+  filename        = "C:\\Users\\hr378\\Downloads\\cluster.pem"
   content         = tls_private_key.my_key.private_key_pem
   file_permission = "0600"
 }
@@ -18,7 +18,7 @@ resource "local_file" "private_key" {
 # Store public key in AWS
 resource "aws_key_pair" "my_key" {
   key_name   = "naruto"
-  public_key = file("C:\\Users\\hr378\\Downloads\\naruto.pem.pub")  # Use existing key
+  public_key = file("C:\\Users\\hr378\\Downloads\\cluster.pem")  # Use existing key
 }
 
 # Security Group for VM
