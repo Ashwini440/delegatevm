@@ -77,5 +77,9 @@ resource "aws_instance" "my_instance" {
     Name = "delegate"
   }
 }
+# Fix SSH output
+output "ssh_command" {
+  value = "ssh -i C:\\Users\\hr378\\Downloads\\cluster.pem ec2-user@${aws_instance.my_instance.public_ip}"
+}
 
 
