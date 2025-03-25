@@ -2,11 +2,6 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# Reference the existing key pair in AWS
-resource "aws_key_pair" "my_key" {
-  key_name = "cluster"  # Use the existing key pair from AWS
-}
-
 # Security Group for VM
 resource "aws_security_group" "vm_sg" {
   name        = "vm-security-group"
