@@ -8,12 +8,12 @@ resource "tls_private_key" "my_key" {
   rsa_bits  = 4096
 }
 
-# Save private key locally (Windows Path)
 resource "local_file" "private_key" {
-  filename        = "C:\\Users\\hr378\\Downloads"
+  filename        = "C:\\Users\\hr378\\Downloads\\naruto.pem"
   content         = tls_private_key.my_key.private_key_pem
   file_permission = "0600"
 }
+
 
 # Store public key in AWS
 resource "aws_key_pair" "my_key" {
