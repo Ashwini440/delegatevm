@@ -31,7 +31,7 @@ resource "aws_security_group" "vm_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["YOUR_PUBLIC_IP/32"]  # Replace with your public IP
+    cidr_blocks = ["0.0.0.0/0"]  # Replace with your public IP
   }
 
   # Allow HTTP access from anywhere
