@@ -18,7 +18,7 @@ resource "local_file" "private_key" {
 # Store public key in AWS
 resource "aws_key_pair" "my_key" {
   key_name   = "naruto"
-  public_key = tls_private_key.my_key.public_key_openssh
+  public_key = file("C:\\Users\\hr378\\Downloads\\naruto.pem.pub")  # Use existing key
 }
 
 # Security Group for VM
@@ -78,11 +78,4 @@ resource "aws_instance" "my_instance" {
   }
 }
 
-# Terraform Outputs
-output "instance_public_ip" {
-  value = aws_instance.my_instance.public_ip
-}
 
-output "ssh_command" {
-  value = "ssh -i C:\\Users\\hr378\\Downloads ec2-user@${aws_instance.my_instance.public_ip}"
-}
